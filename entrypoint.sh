@@ -5,8 +5,12 @@
 ## Contributors: Aussie Server Hosts (https://aussieserverhosts.com/)
 ## Date: 2021/07/13
 ## License: MIT License
+## Modified by Willian (sinskinner):
+## - Added proxy settings to the build.
 
 ## === CONSTANTS ===
+export http_proxy="${PROXY_SERVER}"
+export https_proxy="${PROXY_SERVER}"
 STEAMCMD_DIR="./steamcmd"                       # SteamCMD's directory containing steamcmd.sh
 STEAMCMD_LOG="${STEAMCMD_DIR}/steamcmd.log"     # Log file for SteamCMD
 GAME_ID=107410                                  # SteamCMD ID for the Arma 3 GAME (not server). Only used for Workshop mod downloads.
