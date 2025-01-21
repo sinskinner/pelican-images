@@ -50,9 +50,11 @@ function RunSteamCMD { #[Input: int server=0 mod=1; int id]
         
         # Check if updating server or mod
         if [[ $1 == 0 ]]; then # Server
-            ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +force_install_dir /home/container +app_update $2 $extraFlags $validateServer +quit | tee -a "${STEAMCMD_LOG}"
+            ${STEAMCMD_DIR}/steamcmd.sh +force_install_dir /home/container "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +app_update $2 $extraFlags $validateServer +quit | tee -a "${STEAMCMD_LOG}"
+            sleep 15
         else # Mod
             ${STEAMCMD_DIR}/steamcmd.sh "+login \"${STEAM_USER}\" \"${STEAM_PASS}\"" +workshop_download_item $GAME_ID $2 +quit | tee -a "${STEAMCMD_LOG}"
+            sleep 15
         fi
         
         # Error checking for SteamCMD
@@ -80,7 +82,10 @@ function RunSteamCMD { #[Input: int server=0 mod=1; int id]
             elif [[ -n $(grep -i "Download item" "${STEAMCMD_LOG}") ]]; then # Steam account does not own base game for mod downloads, or unknown
                 echo -e "\n${RED}[UPDATE]: Cannot download mod - Download failed"
                 echo -e "\t${YELLOW}While unknown, this error is likely due to your host's Steam account not owning the base game.${NC}"
-                echo -e "\t${YELLOW}(Please contact your administrator/host if this issue persists)${NC}\n"
+                echo -e "==========="
+                echo -e "$(tail -n 5 ${STEAMCMD_LOG})"
+                echo -e "==========="
+                echo -e "\t(Please contact your administrator/host if this issue persists)"
                 exit 1
             elif [[ -n $(grep -i "0x202\|0x212" "${STEAMCMD_LOG}") ]]; then # Not enough disk space
                 echo -e "\n${RED}[UPDATE]: Unable to complete download - Not enough storage"
@@ -93,6 +98,10 @@ function RunSteamCMD { #[Input: int server=0 mod=1; int id]
                 echo -e "\t${YELLOW}(Please contact your administrator/host if this issue persists)${NC}\n"
                 exit 1
             else # Unknown caught error
+                echo -e "\n${RED}[UPDATE]: ${YELLOW}Steam exited with error the following log:${NC}"
+                echo -e "==========="
+                echo -e "$(tail -n 5 ${STEAMCMD_LOG})"
+                echo -e "==========="
                 echo -e "\n${RED}[UPDATE]: ${YELLOW}An unknown error has occurred with SteamCMD. ${CYAN}Skipping download...${NC}"
                 echo -e "\t(Please contact your administrator/host if this issue persists)"
                 break
